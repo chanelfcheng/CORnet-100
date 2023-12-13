@@ -40,5 +40,5 @@ def cornet_rt(pretrained=False, map_location=None, times=5):
 def cornet_s(pretrained=False, map_location=None):
     return get_model('s', pretrained=pretrained, map_location=map_location)
 
-def cornet_s100(pretrained=False, map_location=None):
-    return get_model('s100', pretrained=pretrained, map_location=map_location)
+def cornet_s100(pretrained=False, map_location=None, V4_to_V1_times=1):
+    return get_model('s100', pretrained=pretrained, map_location=map_location, V4_to_V1_times=V4_to_V1_times)

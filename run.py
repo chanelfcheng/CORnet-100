@@ -32,6 +32,8 @@ parser.add_argument('--model', choices=['Z', 'R', 'RT', 'S', 'S100'], default='Z
                     help='which model to train')
 parser.add_argument('--times', default=5, type=int,
                     help='number of time steps to run the model (only R model)')
+parser.add_argument('--outer_times', default=1, type=int,
+                    help='number of time steps to run the model (only S100 model)')
 parser.add_argument('--ngpus', default=0, type=int,
                     help='number of GPUs to use; 0 if you want to run on CPU')
 parser.add_argument('-j', '--workers', default=4, type=int,
@@ -80,6 +82,8 @@ def get_model(pretrained=False):
     model = getattr(cornet, f'cornet_{FLAGS.model.lower()}')
     if FLAGS.model.lower() == 'r':
         model = model(pretrained=pretrained, map_location=map_location, times=FLAGS.times)
+    elif FLAGS.model.lower() == 's100':
+        model = model(pretrained=pretrained, map_location=map_location, V4_to_V1_times=FLAGS.outer_times)
     else:
         model = model(pretrained=pretrained, map_location=map_location)
 

@@ -7,74 +7,81 @@ git clone https://github.com/chanelfcheng/CORnet-100.git
 cd CORnet-100
 python -m pip install -e .
 ```
-2. We need to install the brain-score benchmarks as well
+<!-- 2. We need to install the brain-score benchmarks as well
 ```bash
 python -m pip install git+https://github.com/brain-score/brain-score
-```
-3. For plotting tools and jupyter notebook, additionally run the following command
+``` -->
+2. For plotting tools and jupyter notebook, additionally run the following command
 ```bash
 python -m pip install matplotlib ipykernel
 ```
-4. Download the reduced ImageNet dataset from Google Drive: https://drive.google.com/drive/folders/1dhuIplae_dr-eNVIhUDmsOkqsNCJ5os8?usp=share_link
+3. Download the MiniImageNet dataset from Kaggle and rename the `test` directory
+   to `val`:
+   https://www.kaggle.com/datasets/ctrnngtrung/miniimagenet/data
 
 ### Run Commands
 - To train a model:
 ```bash
-python run.py train --model S100 --workers 6 --ngpus 1 --step_size 20 --epochs 43 --lr .1 --batch_size 32 --data_path ../ImageNet --output_path exp_name/
+python run.py train --model S100 --workers 6 --ngpus 1 --step_size 20 --epochs 43 --lr .1 --batch_size 16 --data_path ../MiniImageNet --output_path exp_name/
 ```
-- To evaluate the brain score of a model:
+<!-- - To evaluate the brain score of a model:
 ```python
 from brainscore.benchmarks import public_benchmark_pool
 
 benchmark = public_benchmark_pool['dicarlo.MajajHong2015public.IT-pls']
 model = my_model()
 score = benchmark(model)
-```
+``` -->
 
 ### Dataset Information
-- The dataset originally used to train the model was ImageNet LSVRC 2012 (training and validation only), which contains a variety of images of objects, animals, scenes, etc.
+- The dataset originally used to train the model was ImageNet LSVRC 2012, which contains a variety of images of objects, animals, scenes, etc.
 	- **Training data:** 138 GB, ~1.2 million images 
-	- **Validation data:** 6.3 GB, ~150 thousand images
-- We are using a reduced version of the ImageNet in order to make training the model feasible on the ICL6
-	- **Training data:** 16.46 GB, ~130 thousand images
-	- **Validation data:** 732.7 MB, ~5 thousand images
+	- **Validation data:** 12.6 GB, ~300 thousand images
+- We are using the smaller MiniImageNet in order to make training the model feasible on the ICL6
+	- **Training data:** 5.6 GB, ~50 thousand images
+	- **Validation data:** 1.1 GB, ~10 thousand images
 
 ### Data File Organization
-- Data should be downloaded with the top directory being `ImageNet` -- hence the path is `../ImageNet` relative to the project's `run.py` script
-- Within `ImageNet`, there are three directories: `train`, and `val` which contains training and validation data respectively.
-- Within each subdirectory `train` and `val`, there will be several folders denoting each class in the dataset that start with `n` followed by a string of numbers
-- Within each `n` directory, there are images corresponding to that particular class
+- Data should be downloaded with the top directory being `MiniImageNet` -- hence the path is `../MiniImageNet` relative to the project's `run.py` script
+- Within `MiniImageNet`, there should be two directories: `train`, and `val` which contains training and validation data respectively.
+- Within each subdirectory `train` and `val`, there should be several folders denoting each class in the dataset that start with `n` followed by a string of numbers
+- Within each `n` directory, there are images belonging to that particular class
 
 ### Data Pre-Processing
 - The images are pre-processed before being used to train the models
 	- Resizes images to consistent resolution and shape of 224 x 224 x 3
-	- Applies augmentations to the data such as random cropping, rotation, scaling, and horizontal flipping
+	- Applies augmentations to the data such as random cropping and horizontal flipping
 
 ### Example Data
 - Here is one example image from the dataset:
-	- ![Sample Image](Images/sample_image.png)
-- Here is an example image that had an augmentation (horizontal flipping) applied to it:
-	- ![Sample Image Horizontally Flipped](Images/sample_image_flipped.png)
+	- ![Sample Image](figures/sample_image.JPEG)
+- Here is an example image that had an transformation (random crop and horizontal flipping) applied to it:
+	- ![Sample Image Horizontally Flipped](figures/sample_image_transform.JPEG)
 
 ### Visualizations
 - The code does not provide visualizations of the data, which are already viewable as images
 - The code also does not provide visualization for the feature embedding space
 - The top-1 accuracies can be plotted as a function of the training epochs to track the model's learning progress:
-	- ![Preliminary Top 1 Accuracy](Images/preliminary_top1.png)
+	- ![Preliminary Top 1 Accuracy](figures/preliminary_top1.png)
 - The losses can similarly be plotted as a function of the training epochs:
-	- ![Preliminary Loss](Images/preliminary_loss.png)
+	- ![Preliminary Loss](figures/preliminary_loss.png)
 - After more experiments are run, we could also plot final accuracies and brain-scores as a function of the learning rate used for training.
 
 ### Metrics
-- Metrics are *Brain-Score* and *ImageNet top-1 performance*
+<!-- - Metrics are *Brain-Score* and *ImageNet top-1 performance*
 	- **Brain-Score:** Score obtained by averaging neural V4 predictivity, IT predictivity, and behavioral predictivity -- each relating to how closely a computational model matches neural responses in the biological brain
 	- **ImageNet top-1 performance:** Accuracy of a model where the highest output probability prediction is compared against the true label for an image from ImageNet
-- Additionally, we can plot other statistics such as mean, maximum, minimum, and standard deviation
+- Additionally, we can plot other statistics such as mean, maximum, minimum, and standard deviation -->
+- The evaluation metric is *MiniImageNet top-1 accuracy*
+	- **top-1 accuracy:** The class prediction is taken as output class
+	with the highest probability in the model. To evaluate accuracy, each class
+	prediction is compared against the true label. Top-1 accuracy is the
+	percentage of correct predictions out of the total number of predictions made.
 
 ### Additional Program Output
 - Below shows command line output from training the model for 2 epochs (0th one is before any training happens)
 ```bash
-(cornet) cfc6715@fell:~/Courses/CSCI335/Project/CORnet$ python run.py train --model S100 --workers 6 --ngpus 1 --step_size 20 --epochs 43 --lr .1 --batch_size 32 --data_path ../ImageNet --output_path exp_baseline/
+(cornet) cfc6715@fell:~/Courses/CSCI335/Project/CORnet$ python run.py train --model S100 --workers 6 --ngpus 1 --step_size 20 --epochs 43 --lr .1 --batch_size 16 --data_path ../MiniImageNet --output_path exp_baseline/
 Start training
 
 train: {'loss': 4.837890148162842, 'top1': 0.0, 'top5': 0.03125, 'learning_rate': 0.1, 'dur': 44.56482768058777, 'data_load_dur': nan}
