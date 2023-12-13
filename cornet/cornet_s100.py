@@ -94,19 +94,54 @@ class CORblock_S(nn.Module):
         return output
 
 
+class VOneBlock(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super().__init__()
+
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=7, stride=2, padding=3, bias=False)
+        self.norm1 = nn.BatchNorm2d(out_channels)
+        self.nonlin1 = nn.ReLU(inplace=True)
+        self.pool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False)
+        self.norm2 = nn.BatchNorm2d(out_channels)
+        self.nonlin2 = nn.ReLU(inplace=True)
+        self.output = Identity()
+        
+    def forward(self, inp):
+        x = self.conv1(inp)
+        x = self.norm1(x)
+        x = self.nonlin1(x)
+        x = self.pool(x)
+        x = self.conv2(x)
+        x = self.norm2(x)
+        x = self.nonlin2(x)
+        x = self.output(x)
+        return x
+
+
+class DecoderBlock(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super().__init__()
+
+        self.avgpool = nn.AdaptiveAvgPool2d(1)
+        self.flatten = Flatten()
+        self.linear = nn.Linear(in_channels, out_channels)
+        self.output = Identity()
+
+    def forward(self, inp):
+        x = self.avgpool(inp)
+        x = self.flatten(x)
+        x = self.linear(x)
+        x = self.output(x)
+        return x
+
+
 class CORnetSModel(nn.Module):
     def __init__(self, V4_to_V1_times=1):
         super().__init__()
 
-        # V1 block
-        self.V1_conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
-        self.V1_norm1 = nn.BatchNorm2d(64)
-        self.V1_nonlin1 = nn.ReLU(inplace=True)
-        self.V1_pool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.V1_conv2 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, bias=False)
-        self.V1_norm2 = nn.BatchNorm2d(64)
-        self.V1_nonlin2 = nn.ReLU(inplace=True)
-        self.V1_output = Identity()  # Assuming Identity is defined elsewhere
+        # Simplified V1 block
+        self.V1 = VOneBlock(3, 64)
 
         # V2, V4, IT blocks (assuming CORblock_S is defined elsewhere)
         self.V2 = CORblock_S(64, 128, times=2)
@@ -114,10 +149,7 @@ class CORnetSModel(nn.Module):
         self.IT = CORblock_S(256, 512, times=2)
 
         # Decoder block
-        self.decoder_avgpool = nn.AdaptiveAvgPool2d(1)
-        self.decoder_flatten = Flatten()  # Assuming Flatten is defined elsewhere
-        self.decoder_linear = nn.Linear(512, 100)
-        self.decoder_output = Identity()  # Assuming Identity is defined elsewhere
+        self.Decoder = DecoderBlock(512, 100)
         
         # FEEDBACK
         self.V4_to_V1 = nn.Conv2d(256, 3, kernel_size=1, stride=1, padding=1, bias=False)
@@ -128,8 +160,8 @@ class CORnetSModel(nn.Module):
         # Recurrent connection from V4 to V1
         for t in range(self.V4_to_V1_times):
             if t == 0:
-                self.V1_conv1.stride = (2, 2)
-                self.V1_pool.stride = (2, 2)
+                self.V1.conv1.stride = (2, 2)
+                self.V1.pool.stride = (2, 2)
                 
                 self.V2.skip.stride = (2, 2)
                 self.V2.conv2.stride = (2, 2)
@@ -139,8 +171,8 @@ class CORnetSModel(nn.Module):
                 self.V4.conv2.stride = (2, 2)
                 self.V4.V4_to_V1 = False
             else:
-                self.V1_conv1.stride = (1, 1)
-                self.V1_pool.stride = (1, 1)
+                self.V1.conv1.stride = (1, 1)
+                self.V1.pool.stride = (1, 1)
                 
                 self.V2.skip.stride = (1, 1)
                 self.V2.conv2.stride = (1, 1)
@@ -155,14 +187,7 @@ class CORnetSModel(nn.Module):
             # ensure that x has 3 channels only before passing it to V1
             if x.shape[1] > 3:
                 x = self.V4_to_V1(x)
-            x = self.V1_conv1(x)
-            x = self.V1_norm1(x)
-            x = self.V1_nonlin1(x)
-            x = self.V1_pool(x)
-            x = self.V1_conv2(x)
-            x = self.V1_norm2(x)
-            x = self.V1_nonlin2(x)
-            x = self.V1_output(x)
+            x = self.V1(x)
 
             # V2 block
             # print("Before V2:", x.shape)
@@ -177,10 +202,7 @@ class CORnetSModel(nn.Module):
         x = self.IT(x)
 
         # Decoder block
-        x = self.decoder_avgpool(x)
-        x = self.decoder_flatten(x)
-        x = self.decoder_linear(x)
-        x = self.decoder_output(x)
+        x = self.Decoder(x)
 
         return x
 

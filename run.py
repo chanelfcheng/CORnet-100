@@ -321,6 +321,27 @@ class ImageNetTrain(object):
 
         self.optimizer.zero_grad()
         loss.backward()
+        
+        if frac_epoch == 1.0:
+            # Loop to print average gradients per layer in each block
+            for block_name, block in self.model.named_children():
+                print(f"Block: {block_name}")
+
+                for layer_name, layer in block.named_children():
+                    total_grad = 0
+                    total_params = 0
+
+                    # Iterate through parameters in each layer
+                    for parameter in layer.parameters():
+                        if parameter.grad is not None:
+                            total_grad += parameter.grad.abs().sum()
+                            total_params += parameter.numel()
+
+                    # Calculate and print the average gradient
+                    if total_params > 0:
+                        avg_grad = total_grad / total_params
+                        print(f"\tLayer {layer_name} average gradient: {avg_grad}")
+            
         self.optimizer.step()
 
         record['dur'] = time.time() - start

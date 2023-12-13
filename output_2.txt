@@ -2,14 +2,16 @@ Start training
 V4_to_V1_times: 2
 DataParallel(
   (module): CORnetSModel(
-    (V1_conv1): Conv2d(3, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
-    (V1_norm1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-    (V1_nonlin1): ReLU(inplace=True)
-    (V1_pool): MaxPool2d(kernel_size=3, stride=2, padding=1, dilation=1, ceil_mode=False)
-    (V1_conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-    (V1_norm2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-    (V1_nonlin2): ReLU(inplace=True)
-    (V1_output): Identity()
+    (V1): VOneBlock(
+      (conv1): Conv2d(3, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
+      (norm1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (nonlin1): ReLU(inplace=True)
+      (pool): MaxPool2d(kernel_size=3, stride=2, padding=1, dilation=1, ceil_mode=False)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (norm2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (nonlin2): ReLU(inplace=True)
+      (output): Identity()
+    )
     (V2): CORblock_S(
       (conv_input): Conv2d(64, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
       (skip): Conv2d(128, 128, kernel_size=(1, 1), stride=(2, 2), bias=False)
@@ -70,24 +72,14 @@ DataParallel(
       (norm2_1): BatchNorm2d(2048, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
       (norm3_1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
     )
-    (decoder_avgpool): AdaptiveAvgPool2d(output_size=1)
-    (decoder_flatten): Flatten()
-    (decoder_linear): Linear(in_features=512, out_features=100, bias=True)
-    (decoder_output): Identity()
+    (Decoder): DecoderBlock(
+      (avgpool): AdaptiveAvgPool2d(output_size=1)
+      (flatten): Flatten()
+      (linear): Linear(in_features=512, out_features=100, bias=True)
+      (output): Identity()
+    )
     (V4_to_V1): Conv2d(256, 3, kernel_size=(1, 1), stride=(1, 1), padding=(1, 1), bias=False)
   )
 )
 
-train: {'loss': 4.8284382820129395, 'top1': 0.0, 'top5': 0.0, 'learning_rate': 0.1, 'dur': 5.24347448348999, 'data_load_dur': nan}
-val: {'loss': 34783950713.6512, 'top1': 0.01, 'top5': 0.05, 'dur': 0.10681370277404785}
-
-train: {'loss': 4.342584609985352, 'top1': 0.0, 'top5': 0.1875, 'learning_rate': 0.1, 'dur': 0.3698711395263672, 'data_load_dur': 0.0004417896270751953}
-val: {'loss': 4.701124200057984, 'top1': 0.01, 'top5': 0.0539, 'dur': 0.10954639320373535}
-
-train: {'loss': 4.420881271362305, 'top1': 0.0, 'top5': 0.1875, 'learning_rate': 0.1, 'dur': 0.1803431510925293, 'data_load_dur': nan}
-val: {'loss': 4.693120714950561, 'top1': 0.0113, 'top5': 0.0499, 'dur': 0.10952489852905273}
-
-train: {'loss': 4.455869197845459, 'top1': 0.0, 'top5': 0.1875, 'learning_rate': 0.1, 'dur': 0.3715043067932129, 'data_load_dur': 0.00044345855712890625}
-val: {'loss': 4.715955903244018, 'top1': 0.0119, 'top5': 0.0598, 'dur': 0.10965671653747558}
-
-train: {'loss': 4.155580997467041, 'top1': 0.0, 'top5': 0.1875, 'learning_rate': 0.1, 'dur': 0.12386560440063477, 'data_load_dur': nan}
+train: {'loss': 4.828439235687256, 'top1': 0.0, 'top5': 0.0, 'learning_rate': 0.1, 'dur': 5.271217107772827, 'data_load_dur': nan}
