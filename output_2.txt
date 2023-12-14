@@ -81,5 +81,167 @@ DataParallel(
     (V4_to_V1): Conv2d(256, 3, kernel_size=(1, 1), stride=(1, 1), padding=(1, 1), bias=False)
   )
 )
+Block: V1
+	Layer conv1 average gradient: 0.688804030418396
+	Layer norm1 average gradient: 0.13637825846672058
+	Layer conv2 average gradient: 0.1211845651268959
+	Layer norm2 average gradient: 0.11320220679044724
+Block: V2
+	Layer conv_input average gradient: 0.10288956761360168
+	Layer skip average gradient: 0.03910518065094948
+	Layer norm_skip average gradient: 0.045187026262283325
+	Layer conv1 average gradient: 0.06857854872941971
+	Layer conv2 average gradient: 0.02822151407599449
+	Layer conv3 average gradient: 0.023480400443077087
+	Layer norm1_0 average gradient: 0.03146033734083176
+	Layer norm2_0 average gradient: 0.02549925073981285
+	Layer norm3_0 average gradient: 0.048500269651412964
+	Layer norm1_1 average gradient: 0.02090376242995262
+	Layer norm2_1 average gradient: 0.016787320375442505
+	Layer norm3_1 average gradient: 0.02582172304391861
+Block: V4
+	Layer conv_input average gradient: 0.03331705182790756
+	Layer skip average gradient: 0.013073988258838654
+	Layer norm_skip average gradient: 0.015756767243146896
+	Layer conv1 average gradient: 0.025977609679102898
+	Layer conv2 average gradient: 0.01117744017392397
+	Layer conv3 average gradient: 0.009569859132170677
+	Layer norm1_0 average gradient: 0.010689124464988708
+	Layer norm2_0 average gradient: 0.009108029305934906
+	Layer norm3_0 average gradient: 0.015967102721333504
+	Layer norm1_1 average gradient: 0.006378264166414738
+	Layer norm2_1 average gradient: 0.005468222312629223
+	Layer norm3_1 average gradient: 0.009136902168393135
+	Layer norm1_2 average gradient: 0.0040480755269527435
+	Layer norm2_2 average gradient: 0.0032845379319041967
+	Layer norm3_2 average gradient: 0.005300961434841156
+	Layer norm1_3 average gradient: 0.0031391894444823265
+	Layer norm2_3 average gradient: 0.002623975509777665
+	Layer norm3_3 average gradient: 0.0037607871927320957
+Block: IT
+	Layer conv_input average gradient: 0.0014202140737324953
+	Layer skip average gradient: 0.0006534676067531109
+	Layer norm_skip average gradient: 0.0018233906012028456
+	Layer conv1 average gradient: 0.00094847526634112
+	Layer conv2 average gradient: 0.0004773007531184703
+	Layer conv3 average gradient: 0.00054579833522439
+	Layer norm1_0 average gradient: 0.0004279454587958753
+	Layer norm2_0 average gradient: 0.00038813831633888185
+	Layer norm3_0 average gradient: 0.0018290046136826277
+	Layer norm1_1 average gradient: 0.0003625301760621369
+	Layer norm2_1 average gradient: 0.0003803897416219115
+	Layer norm3_1 average gradient: 0.002462944947183132
+Block: Decoder
+	Layer linear average gradient: 0.012966310605406761
+Block: V4_to_V1
 
-train: {'loss': 4.828439235687256, 'top1': 0.0, 'top5': 0.0, 'learning_rate': 0.1, 'dur': 5.271217107772827, 'data_load_dur': nan}
+train: {'loss': 4.828439235687256, 'top1': 0.0, 'top5': 0.0, 'learning_rate': 0.1, 'dur': 5.671488523483276, 'data_load_dur': nan}
+val: {'loss': 34570657002.2912, 'top1': 0.01, 'top5': 0.05, 'dur': 0.11042368621826172}
+Block: V1
+	Layer conv1 average gradient: 0.014074960723519325
+	Layer norm1 average gradient: 0.022885248064994812
+	Layer conv2 average gradient: 0.01403820887207985
+	Layer norm2 average gradient: 0.019632846117019653
+Block: V2
+	Layer conv_input average gradient: 0.012731319293379784
+	Layer skip average gradient: 0.0049809603951871395
+	Layer norm_skip average gradient: 0.005973575636744499
+	Layer conv1 average gradient: 0.00775233656167984
+	Layer conv2 average gradient: 0.002842608140781522
+	Layer conv3 average gradient: 0.00336768152192235
+	Layer norm1_0 average gradient: 0.002958407625555992
+	Layer norm2_0 average gradient: 0.0033538448624312878
+	Layer norm3_0 average gradient: 0.007982777431607246
+	Layer norm1_1 average gradient: 0.002791590988636017
+	Layer norm2_1 average gradient: 0.002632520394399762
+	Layer norm3_1 average gradient: 0.004953304305672646
+Block: V4
+	Layer conv_input average gradient: 0.006176778580993414
+	Layer skip average gradient: 0.002232013503089547
+	Layer norm_skip average gradient: 0.002837470266968012
+	Layer conv1 average gradient: 0.004584471695125103
+	Layer conv2 average gradient: 0.0018963661277666688
+	Layer conv3 average gradient: 0.0022513309959322214
+	Layer norm1_0 average gradient: 0.0015989490784704685
+	Layer norm2_0 average gradient: 0.0015937138814479113
+	Layer norm3_0 average gradient: 0.003424393944442272
+	Layer norm1_1 average gradient: 0.001110475859604776
+	Layer norm2_1 average gradient: 0.001062641735188663
+	Layer norm3_1 average gradient: 0.002256695181131363
+	Layer norm1_2 average gradient: 0.0007223246502690017
+	Layer norm2_2 average gradient: 0.0008096159435808659
+	Layer norm3_2 average gradient: 0.0019093742594122887
+	Layer norm1_3 average gradient: 0.0006823682342655957
+	Layer norm2_3 average gradient: 0.0007433443097397685
+	Layer norm3_3 average gradient: 0.0018545790808275342
+Block: IT
+	Layer conv_input average gradient: 0.002591916127130389
+	Layer skip average gradient: 0.0012625467497855425
+	Layer norm_skip average gradient: 0.0027689088601619005
+	Layer conv1 average gradient: 0.0014005072880536318
+	Layer conv2 average gradient: 0.0007209805771708488
+	Layer conv3 average gradient: 0.0009040557197295129
+	Layer norm1_0 average gradient: 0.0006315797800198197
+	Layer norm2_0 average gradient: 0.000648903485853225
+	Layer norm3_0 average gradient: 0.002866230206564069
+	Layer norm1_1 average gradient: 0.0004989277804270387
+	Layer norm2_1 average gradient: 0.0006167551036924124
+	Layer norm3_1 average gradient: 0.0036985150072723627
+Block: Decoder
+	Layer linear average gradient: 0.011355893686413765
+Block: V4_to_V1
+Block: V1
+	Layer conv1 average gradient: 0.004023566376417875
+	Layer norm1 average gradient: 0.017964046448469162
+	Layer conv2 average gradient: 0.007974948734045029
+	Layer norm2 average gradient: 0.018029339611530304
+Block: V2
+	Layer conv_input average gradient: 0.009560888633131981
+	Layer skip average gradient: 0.0038535611238330603
+	Layer norm_skip average gradient: 0.0048979297280311584
+	Layer conv1 average gradient: 0.004832457285374403
+	Layer conv2 average gradient: 0.0014469580492004752
+	Layer conv3 average gradient: 0.002459391485899687
+	Layer norm1_0 average gradient: 0.00202502915635705
+	Layer norm2_0 average gradient: 0.002763377735391259
+	Layer norm3_0 average gradient: 0.005752646364271641
+	Layer norm1_1 average gradient: 0.0018600794719532132
+	Layer norm2_1 average gradient: 0.00195526541210711
+	Layer norm3_1 average gradient: 0.003850814187899232
+Block: V4
+	Layer conv_input average gradient: 0.004847687669098377
+	Layer skip average gradient: 0.0015964938793331385
+	Layer norm_skip average gradient: 0.0022345392499119043
+	Layer conv1 average gradient: 0.0031703917775303125
+	Layer conv2 average gradient: 0.001160701154731214
+	Layer conv3 average gradient: 0.0018089190125465393
+	Layer norm1_0 average gradient: 0.0010246464516967535
+	Layer norm2_0 average gradient: 0.0011915871873497963
+	Layer norm3_0 average gradient: 0.0026095574721693993
+	Layer norm1_1 average gradient: 0.000740502611733973
+	Layer norm2_1 average gradient: 0.0009395749075338244
+	Layer norm3_1 average gradient: 0.0018140440806746483
+	Layer norm1_2 average gradient: 0.0005442405818030238
+	Layer norm2_2 average gradient: 0.0007202061824500561
+	Layer norm3_2 average gradient: 0.0014011309249326587
+	Layer norm1_3 average gradient: 0.0004822256159968674
+	Layer norm2_3 average gradient: 0.0006630648858845234
+	Layer norm3_3 average gradient: 0.0013176396023482084
+Block: IT
+	Layer conv_input average gradient: 0.002969837049022317
+	Layer skip average gradient: 0.0014716293662786484
+	Layer norm_skip average gradient: 0.0034881478641182184
+	Layer conv1 average gradient: 0.0014507637824863195
+	Layer conv2 average gradient: 0.0006772892083972692
+	Layer conv3 average gradient: 0.0009165427181869745
+	Layer norm1_0 average gradient: 0.0006635382887907326
+	Layer norm2_0 average gradient: 0.000800754118245095
+	Layer norm3_0 average gradient: 0.003557752352207899
+	Layer norm1_1 average gradient: 0.000520699133630842
+	Layer norm2_1 average gradient: 0.0006806398741900921
+	Layer norm3_1 average gradient: 0.004881331697106361
+Block: Decoder
+	Layer linear average gradient: 0.012198386713862419
+Block: V4_to_V1
+
+train: {'loss': 4.441993713378906, 'top1': 0.0, 'top5': 0.1875, 'learning_rate': 0.1, 'dur': 0.3720133304595947, 'data_load_dur': 0.002054929733276367}

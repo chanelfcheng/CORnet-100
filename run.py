@@ -322,9 +322,10 @@ class ImageNetTrain(object):
         self.optimizer.zero_grad()
         loss.backward()
         
-        if frac_epoch == 1.0:
+        if np.isclose(frac_epoch % 1.0, 0.0, atol=1e-3):
             # Loop to print average gradients per layer in each block
-            for block_name, block in self.model.named_children():
+            module = next(self.model.named_children())[1]
+            for block_name, block in module.named_children():
                 print(f"Block: {block_name}")
 
                 for layer_name, layer in block.named_children():
