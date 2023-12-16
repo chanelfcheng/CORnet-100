@@ -33,7 +33,7 @@ parser.add_argument('--model', choices=['Z', 'R', 'RT', 'S', 'S100'], default='Z
 parser.add_argument('--times', default=5, type=int,
                     help='number of time steps to run the model (only R model)')
 parser.add_argument('--outer_times', default=1, type=int,
-                    help='number of time steps to run the model (only S100 model)')
+                    help='number of outer time steps to run the model (only S100 model)')
 parser.add_argument('--ngpus', default=0, type=int,
                     help='number of GPUs to use; 0 if you want to run on CPU')
 parser.add_argument('-j', '--workers', default=4, type=int,
@@ -49,6 +49,10 @@ parser.add_argument('--step_size', default=10, type=int,
 parser.add_argument('--momentum', default=.9, type=float, help='momentum')
 parser.add_argument('--weight_decay', default=1e-4, type=float,
                     help='weight decay ')
+parser.add_argument('--ckpt_path', default='map_clsloc.txt', type=str,
+                    help='path to model ckpt file')
+parser.add_argument('--classes_path', default='map_clsloc.txt', type=str,
+                    help='path to class mappings file')
 
 
 FLAGS, FIRE_FLAGS = parser.parse_known_args()
@@ -197,23 +201,34 @@ def train(restore_path=None,  # useful when you want to restart training
 
 def val(restore_path=None):
     print("Start validation")
-    if restore_path is None:
+    if FLAGS.ckpt_path is None:
         print("Load default pretrained model")
         model = get_model(pretrained=True).cpu()
     else:
-        print("Restore from", restore_path)
-        model = get_model(pretrained=False)
-        ckpt_data = torch.load(restore_path)
+        print("Restore from", FLAGS.ckpt_path)
+        model = get_model(pretrained=False).cpu()
+        ckpt_data = torch.load(FLAGS.ckpt_path)
+        ckpt_data['state_dict'] = {k.replace('module.', ''): v for k, v in ckpt_data['state_dict'].items()}
         model.load_state_dict(ckpt_data['state_dict'])
-        validator.optimizer.load_state_dict(ckpt_data['optimizer'])
-    
+        
     validator = ImageNetVal(model)
 
     record = validator()
     print("val:", record)
 
 
-def test(layer='decoder', sublayer='output', time_step=0, imsize=224):
+def load_class_labels(file_path):
+    class_labels = {}
+    with open(file_path, 'r') as file:
+        for line in file:
+            parts = line.strip().split(' ')
+            index = int(parts[1]) - 1  # subtract 1 for 0-based indexing
+            label = parts[2]
+            class_labels[index] = label
+    return class_labels
+
+
+def test_new(layer='Decoder', sublayer='output', time_step=0, imsize=224):
     """
     Suitable for small image sets. If you have thousands of images or it is
     taking too long to extract features, consider using
@@ -225,7 +240,15 @@ def test(layer='decoder', sublayer='output', time_step=0, imsize=224):
         - time_step (which time step to use for storing features)
         - imsize (resize image to how many pixels, default: 224)
     """
-    model = get_model(pretrained=True).cpu()
+    # model = get_model(pretrained=True).cpu()
+    model = get_model(pretrained=False).cpu()
+    
+    # Load model weights from ckpt
+    ckpt_data = torch.load(FLAGS.ckpt_path)
+    # Adjust the keys
+    ckpt_data['state_dict'] = {k.replace('module.', ''): v for k, v in ckpt_data['state_dict'].items()}
+    model.load_state_dict(ckpt_data['state_dict'])
+    
     transform = torchvision.transforms.Compose([
                     torchvision.transforms.Resize((imsize, imsize)),
                     torchvision.transforms.ToTensor(),
@@ -249,7 +272,10 @@ def test(layer='decoder', sublayer='output', time_step=0, imsize=224):
     model_feats = []
     with torch.no_grad():
         model_feats = []
-        fnames = sorted(glob.glob(os.path.join(FLAGS.data_path, '*.*')))
+        if os.path.isfile(FLAGS.data_path):
+            fnames = [FLAGS.data_path]
+        else:
+            fnames = sorted(glob.glob(os.path.join(FLAGS.data_path, '*.JPEG')))
         if len(fnames) == 0:
             raise FileNotFoundError(f'No files found in {FLAGS.data_path}')
         for fname in tqdm.tqdm(fnames):
@@ -269,7 +295,98 @@ def test(layer='decoder', sublayer='output', time_step=0, imsize=224):
         fname = f'CORnet-{FLAGS.model}_{layer}_{sublayer}_feats.npy'
         np.save(os.path.join(FLAGS.output_path, fname), model_feats)
     
-    print(model_feats)
+    # Load the class labels
+    class_labels = load_class_labels(FLAGS.classes_path)
+
+    # Get the class prediction indices from the model
+    prediction_idxs = np.argmax(model_feats, axis=1)
+    print(prediction_idxs)
+
+    # Map prediction to a class label
+    prediction_labels = [class_labels[idx] for idx in prediction_idxs]
+    
+    # Print unique class labels
+    print(set(prediction_labels))
+
+
+def test_baseline(layer='decoder_output', sublayer='output', time_step=0, imsize=224):
+    """
+    Suitable for small image sets. If you have thousands of images or it is
+    taking too long to extract features, consider using
+    `torchvision.datasets.ImageFolder`, using `ImageNetVal` as an example.
+
+    Kwargs:
+        - layers (choose from: V1, V2, V4, IT, decoder)
+        - sublayer (e.g., output, conv1, avgpool)
+        - time_step (which time step to use for storing features)
+        - imsize (resize image to how many pixels, default: 224)
+    """
+    # model = get_model(pretrained=True).cpu()
+    model = get_model(pretrained=False).cpu()
+    
+    # Load model weights from ckpt
+    ckpt_data = torch.load(FLAGS.ckpt_path)
+    # Adjust the keys
+    ckpt_data['state_dict'] = {k.replace('module.', ''): v for k, v in ckpt_data['state_dict'].items()}
+    model.load_state_dict(ckpt_data['state_dict'])
+    
+    transform = torchvision.transforms.Compose([
+                    torchvision.transforms.Resize((imsize, imsize)),
+                    torchvision.transforms.ToTensor(),
+                    normalize,
+                ])
+    model.eval()
+
+    def _store_feats(layer, inp, output):
+        """An ugly but effective way of accessing intermediate model features
+        """
+        output = output.cpu().numpy()
+        _model_feats.append(np.reshape(output, (len(output), -1)))
+
+    try:
+        m = model.module
+    except:
+        m = model
+    model_layer = getattr(m, layer)
+    model_layer.register_forward_hook(_store_feats)
+
+    model_feats = []
+    with torch.no_grad():
+        model_feats = []
+        if os.path.isfile(FLAGS.data_path):
+            fnames = [FLAGS.data_path]
+        else:
+            fnames = sorted(glob.glob(os.path.join(FLAGS.data_path, '*.*')))
+        if len(fnames) == 0:
+            raise FileNotFoundError(f'No files found in {FLAGS.data_path}')
+        for fname in tqdm.tqdm(fnames):
+            try:
+                im = Image.open(fname).convert('RGB')
+            except:
+                raise FileNotFoundError(f'Unable to load {fname}')
+            im = transform(im)
+            im = im.unsqueeze(0)  # adding extra dimension for batch size of 1
+            _model_feats = []
+            model(im)
+            model_feats.append(_model_feats[time_step])
+        model_feats = np.concatenate(model_feats)
+
+    if FLAGS.output_path is not None:
+        os.makedirs(FLAGS.output_path, exist_ok=True)
+        fname = f'CORnet-{FLAGS.model}_{layer}_{sublayer}_feats.npy'
+        np.save(os.path.join(FLAGS.output_path, fname), model_feats)
+    
+    # Load the class labels
+    class_labels = load_class_labels(FLAGS.classes_path)
+
+    # Get the class prediction indices from the model
+    prediction_idxs = np.argmax(model_feats, axis=1)
+    print(prediction_idxs)
+
+    # Map prediction to a class label
+    prediction_labels = [class_labels[idx] for idx in prediction_idxs]
+    print(prediction_labels)
+    
 
 
 class ImageNetTrain(object):
@@ -403,6 +520,7 @@ def accuracy(output, target, topk=(1,)):
     with torch.no_grad():
         _, pred = output.topk(max(topk), dim=1, largest=True, sorted=True)
         pred = pred.t()
+        print(pred)
         correct = pred.eq(target.view(1, -1).expand_as(pred))
         res = [correct[:k].sum().item() for k in topk]
         return res
