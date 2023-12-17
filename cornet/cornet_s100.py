@@ -142,14 +142,6 @@ class CORnetSModel(nn.Module):
 
         # Simplified V1 block
         self.V1 = VOneBlock(3, 64)
-        # self.V1_conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
-        # self.V1_norm1 = nn.BatchNorm2d(64)
-        # self.V1_nonlin1 = nn.ReLU(inplace=True)
-        # self.V1_pool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        # self.V1_conv2 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, bias=False)
-        # self.V1_norm2 = nn.BatchNorm2d(64)
-        # self.V1_nonlin2 = nn.ReLU(inplace=True)
-        # self.V1_output = Identity()  # Assuming Identity is defined elsewhere
 
         # V2, V4, IT blocks (assuming CORblock_S is defined elsewhere)
         self.V2 = CORblock_S(64, 128, times=2)
@@ -158,10 +150,6 @@ class CORnetSModel(nn.Module):
 
         # Decoder block
         self.Decoder = DecoderBlock(512, 100)
-        # self.decoder_avgpool = nn.AdaptiveAvgPool2d(1)
-        # self.decoder_flatten = Flatten()  # Assuming Flatten is defined elsewhere
-        # self.decoder_linear = nn.Linear(512, 100)
-        # self.decoder_output = Identity()  # Assuming Identity is defined elsewhere
         
         # FEEDBACK
         self.V4_to_V1 = nn.Conv2d(256, 3, kernel_size=1, stride=1, padding=1, bias=False)
@@ -169,13 +157,11 @@ class CORnetSModel(nn.Module):
 
     def forward(self, x):
         
-        # Recurrent connection from V4 to V1
+        # NOTE: Added recurrent connection from V4 to V1 defined by a number of times
         for t in range(self.V4_to_V1_times):
             if t == 0:
                 self.V1.conv1.stride = (2, 2)
                 self.V1.pool.stride = (2, 2)
-                # self.V1_conv1.stride = (2, 2)
-                # self.V1_pool.stride = (2, 2)
 
                 self.V2.skip.stride = (2, 2)
                 self.V2.conv2.stride = (2, 2)
@@ -187,8 +173,6 @@ class CORnetSModel(nn.Module):
             else:
                 self.V1.conv1.stride = (1, 1)
                 self.V1.pool.stride = (1, 1)
-                # self.V1_conv1.stride = (1, 1)
-                # self.V1_pool.stride = (1, 1)
 
                 
                 self.V2.skip.stride = (1, 1)
@@ -201,18 +185,11 @@ class CORnetSModel(nn.Module):
                 
             # V1 block
             # print("Before V1:", x.shape)
-            # ensure that x has 3 channels only before passing it to V1
+            
+            # NOTE: Added convolutional layer to ensure that the output of V4 has 3 channels only before passing it to V1
             if x.shape[1] > 3:
                 x = self.V4_to_V1(x)
             x = self.V1(x)
-            # x = self.V1_conv1(x)
-            # x = self.V1_norm1(x)
-            # x = self.V1_nonlin1(x)
-            # x = self.V1_pool(x)
-            # x = self.V1_conv2(x)
-            # x = self.V1_norm2(x)
-            # x = self.V1_nonlin2(x)
-            # x = self.V1_output(x)
 
             # V2 block
             # print("Before V2:", x.shape)
@@ -228,16 +205,12 @@ class CORnetSModel(nn.Module):
 
         # Decoder block
         x = self.Decoder(x)
-        # x = self.decoder_avgpool(x)
-        # x = self.decoder_flatten(x)
-        # x = self.decoder_linear(x)
-        # x = self.decoder_output(x)
-
 
         return x
 
 
 def CORnet_S100(V4_to_V1_times=1):
+    # NOTE: Printed this at the start to ensure that we are using the correct model
     print("V4_to_V1_times:", V4_to_V1_times)
     model = CORnetSModel(V4_to_V1_times=V4_to_V1_times)
 
