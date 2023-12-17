@@ -7,10 +7,6 @@ git clone https://github.com/chanelfcheng/CORnet-100.git
 cd CORnet-100
 python -m pip install -e .
 ```
-<!-- 2. We need to install the brain-score benchmarks as well
-```bash
-python -m pip install git+https://github.com/brain-score/brain-score
-``` -->
 2. For plotting tools and jupyter notebook, additionally run the following command
 ```bash
 python -m pip install matplotlib ipykernel
@@ -20,18 +16,28 @@ python -m pip install matplotlib ipykernel
    https://www.kaggle.com/datasets/ctrnngtrung/miniimagenet/data
 
 ### Run Commands
-- To train a model:
+- To train a model with no feedback connection (`outer_times` determines how
+  many times the V1 to V4 path is run, so with no feedback
+  connection this is just `1`):
 ```bash
-python run.py train --model S100 --workers 6 --ngpus 1 --step_size 20 --epochs 43 --lr .1 --batch_size 16 --data_path ../MiniImageNet --output_path exp_name/
+python run.py train --model S100 --workers 6 --ngpus 1 --step_size 20 --epochs 43 --lr .1 --batch_size 16 --outer_times 1 --data_path ../MiniImageNet/ --output_path exp_name/
 ```
-<!-- - To evaluate the brain score of a model:
-```python
-from brainscore.benchmarks import public_benchmark_pool
-
-benchmark = public_benchmark_pool['dicarlo.MajajHong2015public.IT-pls']
-model = my_model()
-score = benchmark(model)
-``` -->
+- To train a model with a feedback connection with 1 recurrent iteration:
+```bash
+python run.py train --model S100 --workers 6 --ngpus 1 --step_size 20 --epochs 43 --lr .1 --batch_size 16 --outer_times 2 --data_path ../MiniImageNet/ --output_path exp_name/
+```
+- To train a model with a feedback connection with 2 recurrent iterations:
+```bash
+python run.py train --model S100 --workers 6 --ngpus 1 --step_size 20 --epochs 43 --lr .1 --batch_size 16 --outer_times 3 --data_path ../MiniImageNet/ --output_path exp_name/
+```
+- To train a model with a feedback connection with 3 recurrent iterations:
+```bash
+python run.py train --model S100 --workers 6 --ngpus 1 --step_size 20 --epochs 43 --lr .1 --batch_size 16 --outer_times 4 --data_path ../MiniImageNet/ --output_path exp_name/
+```
+- To evaluate a model:
+```bash
+python run.py test --model S100 --batch_size 16 --ckpt_path /path/to/ckpt.pth.tar --data_path /path/to/image/folder/ --output_path output_dir/
+```
 
 ### Dataset Information
 - The dataset originally used to train the model was ImageNet LSVRC 2012, which contains a variety of images of objects, animals, scenes, etc.
@@ -68,10 +74,6 @@ score = benchmark(model)
 - After more experiments are run, we could also plot final accuracies and brain-scores as a function of the learning rate used for training.
 
 ### Metrics
-<!-- - Metrics are *Brain-Score* and *ImageNet top-1 performance*
-	- **Brain-Score:** Score obtained by averaging neural V4 predictivity, IT predictivity, and behavioral predictivity -- each relating to how closely a computational model matches neural responses in the biological brain
-	- **ImageNet top-1 performance:** Accuracy of a model where the highest output probability prediction is compared against the true label for an image from ImageNet
-- Additionally, we can plot other statistics such as mean, maximum, minimum, and standard deviation -->
 - The evaluation metric is *MiniImageNet top-1 accuracy*
 	- **top-1 accuracy:** The class prediction is taken as output class
 	with the highest probability in the model. To evaluate accuracy, each class
@@ -81,7 +83,7 @@ score = benchmark(model)
 ### Additional Program Output
 - Below shows command line output from training the model for 2 epochs (0th one is before any training happens)
 ```bash
-(cornet) cfc6715@fell:~/Courses/CSCI335/Project/CORnet$ python run.py train --model S100 --workers 6 --ngpus 1 --step_size 20 --epochs 43 --lr .1 --batch_size 16 --data_path ../MiniImageNet --output_path exp_baseline/
+(cornet) cfc6715@fell:~/Courses/CSCI335/Project/CORnet$ python run.py train --model S100 --workers 6 --ngpus 1 --step_size 20 --epochs 43 --lr .1 --batch_size 16 --outer_times 1 --data_path ../MiniImageNet/ --output_path exp_baseline/
 Start training
 
 train: {'loss': 4.837890148162842, 'top1': 0.0, 'top5': 0.03125, 'learning_rate': 0.1, 'dur': 44.56482768058777, 'data_load_dur': nan}
@@ -111,4 +113,5 @@ val: {'loss': 2.939142420196533, 'top1': 0.2842, 'top5': 0.5728, 'dur': 0.129317
 train: {'loss': 2.832486391067505, 'top1': 0.34375, 'top5': 0.59375, 'learning_rate': 0.1, 'dur': 0.1426398754119873, 'data_load_dur': nan}
 
 val: {'loss': 2.806280549240112, 'top1': 0.3158, 'top5': 0.6018, 'dur': 0.12972281692893642}
+...
 ```
